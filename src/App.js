@@ -70,6 +70,9 @@ function App() {
           This is not official information. For entertainment purposes only. Based on data from the <a className="App-link" href="https://coronavirus.data.gov.uk/" target="_blank" rel="noopener noreferrer">UK Government</a>.
           <br />
           Contains public sector information licensed under the <a className="App-link" href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/" target="_blank" rel="noopener noreferrer">Open Government Licence v3.0</a>.</p>
+        <p className="App-license-info">
+        <a className="App-link" href="https://github.com/luntdotp/vaccine-counter" target="_blank" rel="noopener noreferrer">Source Code</a>
+        </p>
       </header>
     </div>
   );
