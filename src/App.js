@@ -63,7 +63,7 @@ function App() {
           <Counter />
         </div>
         <p>
-          Estimated people who have received 1st dose COVID-19 vaccinations.
+          Estimated people who have received 1st dose of COVID-19 vaccination in the UK.
         </p>
         <p className="App-license-info">
           This is not official information. For entertainment purposes only. Based on data from the <a className="App-link" href="https://coronavirus.data.gov.uk/" target="_blank" rel="noopener noreferrer">UK Government</a>.
