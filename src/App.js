@@ -26,8 +26,7 @@ class Counter extends React.Component {
     }).then((response) => {
       const lastSeven = response.data.body.slice(0, 6);
       const totalLastSeven = lastSeven.flatMap(day => day.newPeopleVaccinatedFirstDoseByPublishDate).reduce((a, b) => a + b, 0);
-      const avgLastSeven = totalLastSeven / 7;
-      const avgPerSecond = avgLastSeven/(24*60*60);
+      const avgPerSecond = totalLastSeven/(7*24*60*60);
       const date = new Date();
       const seconds = date.getSeconds() + (60 * (date.getMinutes() + (60 * date.getHours())));
       const correction = Math.floor(avgPerSecond * seconds);
@@ -39,7 +38,7 @@ class Counter extends React.Component {
       
       this.timer = setInterval(() => {
         this.setState({
-          correction: this.state.correction += 1
+          correction: this.state.correction + 1
         });
       }, timeForOne);
     })
