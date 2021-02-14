@@ -10,55 +10,65 @@ class Counter extends React.Component {
       baseCount: 0,
       baseCorrection: 0,
       additionalCorrection: 0,
-      dataDate: null,
+      dataReferenceDate: null,
     }
   }
-  componentWillMount() {
-    axios({
+  componentDidMount() {
+    const cumulativeDosesPromise = axios({
       method: 'get',
       url: 'https://api.coronavirus.data.gov.uk/v2/data?areaType=overview&metric=cumPeopleVaccinatedFirstDoseByPublishDate&format=json'
-    }).then((response) => {
-      const dateArray = response.data.body[0].date.split("-")
-      const dataDate = new Date(dateArray[0], parseInt(dateArray[1]) - 1, dateArray[2], 23, 59, 59)
+    })
+
+    const newDosesPromise = axios({
+      method: 'get',
+      url: 'https://api.coronavirus.data.gov.uk/v2/data?areaType=overview&metric=newPeopleVaccinatedFirstDoseByPublishDate&format=json'
+    })
+
+    Promise.all([cumulativeDosesPromise, newDosesPromise]).then((responses) => {
+      const cumulativeDoseResponse = responses[0].data.body[0]
+      const newDosesResponse = responses[1].data.body
+
+      const referenceDateArray = cumulativeDoseResponse.date.split("-")
+      const dataReferenceDate = new Date(referenceDateArray[0], parseInt(referenceDateArray[1]) - 1, referenceDateArray[2], 23, 59, 59)
+
+      const lastSeven = newDosesResponse.slice(0, 6);
+      const totalLastSeven = lastSeven.flatMap(day => day.newPeopleVaccinatedFirstDoseByPublishDate).reduce((a, b) => a + b, 0);
+      const avgPerSecond = totalLastSeven/(7*24*60*60);
+      const timeForOne = Math.floor((1 / avgPerSecond) *  1000);
+
       this.setState({
-        baseCount: response.data.body[0].cumPeopleVaccinatedFirstDoseByPublishDate,
-        dataDate: dataDate
+        baseCount: cumulativeDoseResponse.cumPeopleVaccinatedFirstDoseByPublishDate,
+        dataReferenceDate,
+        avgPerSecond
       });
 
-      axios({
-        method: 'get',
-        url: 'https://api.coronavirus.data.gov.uk/v2/data?areaType=overview&metric=newPeopleVaccinatedFirstDoseByPublishDate&format=json'
-      }).then((response) => {
-        const lastSeven = response.data.body.slice(0, 6);
-        const totalLastSeven = lastSeven.flatMap(day => day.newPeopleVaccinatedFirstDoseByPublishDate).reduce((a, b) => a + b, 0);
-        const avgPerSecond = totalLastSeven/(7*24*60*60);
-        const timeForOne = Math.floor((1 / avgPerSecond) *  1000);
+      this.getBaseCorrection()
 
-        this.setState({
-          avgPerSecond
-        });
-        
-        this.getBaseCorrection()
-
-        this.timer = setInterval(() => {
+      this.timer = setInterval(() => {
+        if (this.state.additionalCorrection >= 500) { // Do more maths, less often
+          this.getBaseCorrection();
+          this.setState({
+            additionalCorrection: 0
+          });
+        } else {
           this.setState({
             additionalCorrection: this.state.additionalCorrection + 1
           });
-        }, timeForOne);
-      })
-    })
-  }
-  componentWillUnmount(){
-      clearTimeout(this.timer);
+        }
+      }, timeForOne);
+    });
   }
   getBaseCorrection() {
     const dateNow = new Date();
-    const secondsSinceDataPublished = Math.floor((dateNow.getTime() - this.state.dataDate.getTime()) / 1000);
+    const secondsSinceDataPublished = Math.floor((dateNow.getTime() - this.state.dataReferenceDate.getTime()) / 1000);
     const baseCorrection = Math.floor(this.state.avgPerSecond * secondsSinceDataPublished);
 
     this.setState({
       baseCorrection,
     });
+  }
+  componentWillUnmount(){
+    clearTimeout(this.timer);
   }
   render() {
     return (
