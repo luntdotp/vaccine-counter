@@ -29,7 +29,7 @@ class Counter extends React.Component {
       const newDosesResponse = responses[1].data.body
 
       const referenceDateArray = cumulativeDoseResponse.date.split("-")
-      const dataReferenceDate = new Date(referenceDateArray[0], parseInt(referenceDateArray[1]) - 1, referenceDateArray[2], 23, 59, 59)
+      const dataReferenceDate = new Date(referenceDateArray[0], parseInt(referenceDateArray[1]) - 1, referenceDateArray[2], 23, 59, 59) // TODO Handle timezones better
 
       const lastSeven = newDosesResponse.slice(0, 6);
       const totalLastSeven = lastSeven.flatMap(day => day.newPeopleVaccinatedFirstDoseByPublishDate).reduce((a, b) => a + b, 0);
