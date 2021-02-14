@@ -1,10 +1,10 @@
-import React from 'react';
-import axios from 'axios';
-import './App.css';
+import React from 'react'
+import axios from 'axios'
+import './App.css'
 
 class Counter extends React.Component {
   constructor(props) {
-    super(props);
+    super(props)
     this.state = {
       avgPerSecond: 0,
       baseCount: 0,
@@ -31,53 +31,53 @@ class Counter extends React.Component {
       const referenceDateArray = cumulativeDoseResponse.date.split("-")
       const dataReferenceDate = new Date(referenceDateArray[0], parseInt(referenceDateArray[1]) - 1, referenceDateArray[2], 23, 59, 59) // TODO Handle timezones better
 
-      const lastSeven = newDosesResponse.slice(0, 6);
-      const totalLastSeven = lastSeven.flatMap(day => day.newPeopleVaccinatedFirstDoseByPublishDate).reduce((a, b) => a + b, 0);
-      const avgPerSecond = totalLastSeven/(7*24*60*60);
-      const timeForOne = Math.floor((1 / avgPerSecond) *  1000);
+      const lastSeven = newDosesResponse.slice(0, 6)
+      const totalLastSeven = lastSeven.flatMap(day => day.newPeopleVaccinatedFirstDoseByPublishDate).reduce((a, b) => a + b, 0)
+      const avgPerSecond = totalLastSeven/(7*24*60*60)
+      const timeForOne = Math.floor((1 / avgPerSecond) *  1000)
 
       this.setState({
         baseCount: cumulativeDoseResponse.cumPeopleVaccinatedFirstDoseByPublishDate,
         dataReferenceDate,
         avgPerSecond
-      });
+      })
 
       this.getBaseCorrection()
 
       this.timer = setInterval(() => {
         if (this.state.additionalCorrection >= 500) { // Do more maths, less often
-          this.getBaseCorrection();
+          this.getBaseCorrection()
           this.setState({
             additionalCorrection: 0
-          });
+          })
         } else {
           this.setState({
             additionalCorrection: this.state.additionalCorrection + 1
-          });
+          })
         }
-      }, timeForOne);
-    });
+      }, timeForOne)
+    })
   }
   getBaseCorrection() {
-    const dateNow = new Date();
-    const secondsSinceDataPublished = Math.floor((dateNow.getTime() - this.state.dataReferenceDate.getTime()) / 1000);
-    const baseCorrection = Math.floor(this.state.avgPerSecond * secondsSinceDataPublished);
+    const dateNow = new Date()
+    const secondsSinceDataPublished = Math.floor((dateNow.getTime() - this.state.dataReferenceDate.getTime()) / 1000)
+    const baseCorrection = Math.floor(this.state.avgPerSecond * secondsSinceDataPublished)
 
     this.setState({
       baseCorrection,
-    });
+    })
   }
   componentWillUnmount(){
-    clearTimeout(this.timer);
+    clearTimeout(this.timer)
   }
   render() {
     return (
       <div>
         {this.state.baseCount + this.state.baseCorrection + this.state.additionalCorrection}
       </div>
-    );
+    )
   }
-};
+}
 
 function App() {
   return (
@@ -98,8 +98,8 @@ function App() {
         </p>
       </header>
     </div>
-  );
+  )
 }
 
 
-export default App;
+export default App
